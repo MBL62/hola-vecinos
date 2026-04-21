@@ -1,0 +1,122 @@
+.list-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.list-header {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.list-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 30%, var(--color-brand-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.list-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.list-search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.list-search {
+  padding-left: 36px !important;
+  width: 100%;
+}
+.list-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px;
+}
+
+/* Category chips */
+.list-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.cat-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cat-chip {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-base);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  text-transform: capitalize;
+}
+.cat-chip.active {
+  background: var(--color-brand);
+  color: #fff;
+  border-color: var(--color-brand);
+}
+
+.nearby-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nearby-toggle input { width: auto; cursor: pointer; accent-color: var(--color-brand); }
+
+/* Body */
+.list-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl) var(--space-md);
+  text-align: center;
+  color: var(--color-text-muted);
+}
