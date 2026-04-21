@@ -1,28 +1,41 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNotif } from '../context/NotifContext'
 import './BottomNav.css'
 
-const TABS = [
-  { to: '/',        icon: '🗺️', label: 'Mapa'   },
-  { to: '/list',    icon: '☰',  label: 'Ofertas' },
-  { to: '/chats',   icon: '💬', label: 'Chats'   },
-  { to: '/profile', icon: '👤', label: 'Perfil'  },
-]
-
 export default function BottomNav() {
+  const { unreadCount, clearUnread } = useNotif()
+  const location = useLocation()
+
+  // Limpiar badge al entrar a /chats
+  useEffect(() => {
+    if (location.pathname === '/chats') clearUnread()
+  }, [location.pathname, clearUnread])
+
   return (
     <nav className="bottom-nav glass" aria-label="Navegación principal">
-      {TABS.map(tab => (
-        <NavLink
-          key={tab.to}
-          to={tab.to}
-          end={tab.to === '/'}
-          className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
-          id={`nav-${tab.label.toLowerCase()}`}
-        >
-          <span className="bottom-nav-icon">{tab.icon}</span>
-          <span className="bottom-nav-label">{tab.label}</span>
-        </NavLink>
-      ))}
+      <NavLink to="/" end className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} id="nav-mapa">
+        <span className="bottom-nav-icon">🗺️</span>
+        <span className="bottom-nav-label">Mapa</span>
+      </NavLink>
+      <NavLink to="/list" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} id="nav-ofertas">
+        <span className="bottom-nav-icon">☰</span>
+        <span className="bottom-nav-label">Ofertas</span>
+      </NavLink>
+      <NavLink to="/chats" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} id="nav-chats">
+        <span className="bottom-nav-icon-wrap">
+          <span className="bottom-nav-icon">💬</span>
+          {unreadCount > 0 && (
+            <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+          )}
+        </span>
+        <span className="bottom-nav-label">Chats</span>
+      </NavLink>
+      <NavLink to="/profile" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} id="nav-perfil">
+        <span className="bottom-nav-icon">👤</span>
+        <span className="bottom-nav-label">Perfil</span>
+      </NavLink>
     </nav>
   )
 }
+

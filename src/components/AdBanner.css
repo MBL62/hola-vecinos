@@ -1,0 +1,122 @@
+.ad-banner {
+  width: 100%;
+  height: 50px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 400;
+}
+
+.ad-label {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+.ad-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  background: linear-gradient(90deg, var(--color-surface-2) 0%, transparent 100%);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  border: 1px dashed var(--color-border);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.ad-placeholder:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand-light);
+}
+
+.ad-placeholder-emoji {
+  font-size: 1.1rem;
+}
+
+.ad-placeholder-text {
+  flex: 1;
+  font-size: 0.78rem;
+}
+
+.ad-placeholder-cta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-brand-light);
+  white-space: nowrap;
+}
+
+/* Toast de notificación in-app */
+.notif-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-brand);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  cursor: pointer;
+  animation: toastIn 0.3s var(--ease);
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.notif-toast-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.notif-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-toast-sender {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-brand-light);
+}
+
+.notif-toast-preview {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notif-toast-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}

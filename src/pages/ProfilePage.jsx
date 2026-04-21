@@ -85,6 +85,12 @@ export default function ProfilePage() {
     fetchMyPosts()
   }
 
+  async function handleDelivered(postId) {
+    if (!window.confirm('¿Marcar como entregado? El post se cerrará. ¡Felicitaciones por el intercambio! 🎉')) return
+    await supabase.from('posts').delete().eq('id', postId)
+    fetchMyPosts()
+  }
+
   async function handleToggleStore(field, value) {
     if (field === 'is_store') setIsStore(value)
     if (field === 'is_open')  setIsOpen(value)
@@ -188,12 +194,22 @@ export default function ProfilePage() {
                   <span className="my-post-title">{post.title}</span>
                   <span className="my-post-meta">⏱ {hoursLeft}h restantes</span>
                 </div>
-                <button
-                  id={`btn-del-${post.id}`}
-                  className="btn btn-danger btn-delete-post"
-                  onClick={() => handleDeletePost(post.id)}
-                  aria-label="Eliminar"
-                >🗑️</button>
+                <div className="my-post-actions">
+                  <button
+                    id={`btn-delivered-${post.id}`}
+                    className="btn btn-success btn-post-action"
+                    onClick={() => handleDelivered(post.id)}
+                    aria-label="Entrega realizada"
+                    title="Entrega realizada"
+                  >✅</button>
+                  <button
+                    id={`btn-del-${post.id}`}
+                    className="btn btn-danger btn-post-action"
+                    onClick={() => handleDeletePost(post.id)}
+                    aria-label="Eliminar"
+                    title="Eliminar"
+                  >🗑️</button>
+                </div>
               </div>
             )
           })}

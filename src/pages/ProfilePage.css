@@ -107,10 +107,23 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
-.btn-delete-post {
+.my-post-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.btn-post-action {
   padding: 6px 10px !important;
   font-size: var(--text-sm) !important;
   flex-shrink: 0;
+}
+.btn-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  border: none;
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #10b981, #34d399);
 }
 
 /* Store toggle */

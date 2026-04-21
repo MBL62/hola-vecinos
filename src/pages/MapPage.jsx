@@ -72,10 +72,24 @@ export default function MapPage({ userLocation, onLocated }) {
   async function fetchPosts() {
     const { data, error } = await supabase
       .from('posts')
-      .select('*, profiles(display_name, avatar_url, is_store, is_open)')
+      .select('*, profiles(display_name, avatar_url)')
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
     if (!error) setPosts(data || [])
+  }
+
+  // Separa pines en el mismo GPS distribuyéndolos en arco circular (~15m de radio)
+  function getJitteredPosition(post, allPosts) {
+    const sameSpot = allPosts.filter(p => p.lat === post.lat && p.lng === post.lng)
+    if (sameSpot.length <= 1) return [post.lat, post.lng]
+    const idx = sameSpot.findIndex(p => p.id === post.id)
+    const total = sameSpot.length
+    const angle = (2 * Math.PI * idx) / total
+    const radius = 0.00014 // ~15 metros
+    return [
+      post.lat + radius * Math.cos(angle),
+      post.lng + radius * Math.sin(angle),
+    ]
   }
 
   const filteredPosts = posts.filter(p => {
@@ -139,7 +153,7 @@ export default function MapPage({ userLocation, onLocated }) {
         {filteredPosts.map(post => (
           <Marker
             key={post.id}
-            position={[post.lat, post.lng]}
+            position={getJitteredPosition(post, filteredPosts)}
             icon={createCategoryIcon(post.category)}
             eventHandlers={{ click: () => setSelectedPost(post) }}
           >
@@ -149,11 +163,6 @@ export default function MapPage({ userLocation, onLocated }) {
                 <span className="popup-cat">{CATEGORY_EMOJIS[post.category]} {post.category}</span>
                 {post.price && <span className="popup-price">{formatPrice(post.price)}</span>}
                 {!post.price && (post.category === 'regalo') && <span className="popup-free">🎁 Gratis</span>}
-                {post.profiles?.is_store && (
-                  <span className={`popup-status ${post.profiles.is_open ? 'open' : 'closed'}`}>
-                    {post.profiles.is_open ? '🟢 Abierto' : '🔴 Cerrado'}
-                  </span>
-                )}
                 <span className="popup-user">👤 {post.profiles?.display_name || 'Vecino'}</span>
               </div>
             </Popup>

@@ -35,15 +35,23 @@ export default function NewPostModal({ userLocation, onClose, onCreated }) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
   }
 
+  const MAX_PRICE = 99_999_999
+
   // Formatea el precio con separadores de miles (formato chileno: 1.000.000)
   function handlePriceChange(e) {
     const raw = e.target.value.replace(/\D/g, '')  // solo dígitos
     if (!raw) {
       setPriceDisplay('')
       setPriceRaw(null)
+      setError('')
       return
     }
     const num = parseInt(raw, 10)
+    if (num > MAX_PRICE) {
+      setError(`El precio máximo permitido es $${MAX_PRICE.toLocaleString('es-CL')}`)
+      return
+    }
+    setError('')
     setPriceRaw(num)
     // Formato es-CL usa puntos para miles
     setPriceDisplay(num.toLocaleString('es-CL'))
@@ -82,6 +90,14 @@ export default function NewPostModal({ userLocation, onClose, onCreated }) {
 
     if (showPrice && priceDisplay && priceRaw === null) {
       setError('El precio debe ser un número válido.')
+      return
+    }
+    if (showPrice && priceRaw !== null && priceRaw > MAX_PRICE) {
+      setError(`El precio máximo permitido es $${MAX_PRICE.toLocaleString('es-CL')}`)
+      return
+    }
+    if (showPrice && priceRaw !== null && priceRaw < 0) {
+      setError('El precio debe ser mayor a $0.')
       return
     }
 
