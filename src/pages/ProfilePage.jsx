@@ -19,6 +19,24 @@ export default function ProfilePage() {
   const [isStore, setIsStore] = useState(false)
   const [isOpen, setIsOpen] = useState(true)
   const [showTyC, setShowTyC] = useState(false)
+  const [loadingResend, setLoadingResend] = useState(false)
+  const [msgResend, setMsgResend] = useState('')
+  const [errResend, setErrResend] = useState('')
+
+  const emailVerified = !!user?.email_confirmed_at
+
+  async function handleResendConfirmation() {
+    setMsgResend('')
+    setErrResend('')
+    setLoadingResend(true)
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+    })
+    setLoadingResend(false)
+    if (error) setErrResend('No se pudo enviar: ' + error.message)
+    else setMsgResend('✅ Correo enviado a ' + user.email + '. Revisa tu bandeja de entrada.')
+  }
 
   useEffect(() => {
     if (user) { fetchProfile(); fetchMyPosts() }
@@ -112,6 +130,27 @@ export default function ProfilePage() {
 
       {/* Área scrollable */}
       <div className="profile-body">
+
+        {/* Verificación de email */}
+        <section className="profile-section">
+          <h2 className="section-title">✉️ Correo electrónico</h2>
+          <p className="section-hint">{user?.email}</p>
+          <div className={`email-status ${emailVerified ? 'verified' : 'unverified'}`}>
+            {emailVerified
+              ? '✅ Correo verificado'
+              : '⚠️ Correo no verificado — revisa tu bandeja de entrada'}
+          </div>
+          {errResend && <p className="error-msg">{errResend}</p>}
+          {msgResend && <p className="success-msg">{msgResend}</p>}
+          <button
+            id="btn-resend-confirmation"
+            className="btn btn-ghost btn-full"
+            onClick={handleResendConfirmation}
+            disabled={loadingResend}
+          >
+            {loadingResend ? <span className="spinner" /> : '📨 Reenviar correo de confirmación'}
+          </button>
+        </section>
 
         {/* Nombre público */}
         <section className="profile-section">
