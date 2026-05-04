@@ -83,17 +83,21 @@
   border-color: var(--color-brand);
 }
 
-.nearby-toggle {
+/* Filtro de radio */
+.radius-filter {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  white-space: nowrap;
+  gap: 5px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
-.nearby-toggle input { width: auto; cursor: pointer; accent-color: var(--color-brand); }
+.radius-filter::-webkit-scrollbar { display: none; }
+.radius-label {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
 
 /* Body */
 .list-body {

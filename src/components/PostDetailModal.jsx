@@ -35,6 +35,21 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
     navigate(`/chat/${post.id}/${post.user_id}`)
   }
 
+  async function handleShare() {
+    const url = `${window.location.origin}/?post=${post.id}`
+    const shareData = {
+      title: post.title,
+      text: `${post.description}${post.price ? ' — $' + post.price.toLocaleString('es-CL') : ''}`,
+      url,
+    }
+    if (navigator.share) {
+      try { await navigator.share(shareData) } catch {}
+    } else {
+      await navigator.clipboard.writeText(url)
+      window.alert('¡Enlace copiado al portapapeles!')
+    }
+  }
+
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal post-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
@@ -76,6 +91,13 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
           </div>
 
           <div className="post-actions">
+            <button
+              id="btn-share-post"
+              className="btn btn-ghost btn-full"
+              onClick={handleShare}
+            >
+              🔗 Compartir
+            </button>
             {isOwner ? (
               <button id="btn-delete-post" className="btn btn-danger btn-full" onClick={handleDelete}>
                 🗑️ Eliminar publicación

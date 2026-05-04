@@ -22,6 +22,8 @@ export default function ProfilePage() {
   const [loadingResend, setLoadingResend] = useState(false)
   const [msgResend, setMsgResend] = useState('')
   const [errResend, setErrResend] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState(null)
+  const [loadingAvatar, setLoadingAvatar] = useState(false)
 
   const emailVerified = !!user?.email_confirmed_at
 
@@ -48,7 +50,25 @@ export default function ProfilePage() {
       setDisplayName(data.display_name || '')
       setIsStore(data.is_store ?? false)
       setIsOpen(data.is_open ?? true)
+      if (data.avatar_url) setAvatarUrl(data.avatar_url)
     }
+  }
+
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) { alert('La imagen no puede superar 2MB'); return }
+    setLoadingAvatar(true)
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/avatar.${ext}`
+    const { error: upErr } = await supabase.storage
+      .from('avatars').upload(path, file, { upsert: true })
+    if (upErr) { alert('Error al subir imagen: ' + upErr.message); setLoadingAvatar(false); return }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+    const publicUrl = urlData.publicUrl + '?t=' + Date.now()
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
+    setAvatarUrl(publicUrl)
+    setLoadingAvatar(false)
   }
 
   async function fetchMyPosts() {
@@ -121,7 +141,25 @@ export default function ProfilePage() {
     <div className="profile-page">
       {/* Header fijo */}
       <header className="profile-header glass">
-        <div className="profile-avatar-big">{(displayName || 'V')[0].toUpperCase()}</div>
+        <div className="profile-avatar-wrap">
+          <div className="profile-avatar-big">
+            {avatarUrl
+              ? <img src={avatarUrl} alt="Avatar" className="avatar-img" />
+              : <span>{(displayName || 'V')[0].toUpperCase()}</span>
+            }
+            {loadingAvatar && <div className="avatar-loading-overlay"><div className="spinner" /></div>}
+          </div>
+          <label className="avatar-edit-btn" title="Cambiar foto" htmlFor="avatar-input">
+            📸
+            <input
+              id="avatar-input"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleAvatarChange}
+            />
+          </label>
+        </div>
         <div>
           <h1 className="profile-name">{displayName || 'Mi perfil'}</h1>
           <p className="profile-email">{user?.email}</p>

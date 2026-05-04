@@ -20,6 +20,13 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
 }
 
 const CATEGORY_OPTIONS = ['todas', 'producto', 'servicio', 'regalo', 'trueque']
+const RADIUS_OPTIONS = [
+  { label: 'Todo', value: null },
+  { label: '500m', value: 500 },
+  { label: '1km',  value: 1000 },
+  { label: '2km',  value: 2000 },
+  { label: '5km',  value: 5000 },
+]
 
 export default function ListPage({ userLocation }) {
   const { user } = useAuth()
@@ -28,7 +35,7 @@ export default function ListPage({ userLocation }) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('todas')
-  const [onlyNearby, setOnlyNearby] = useState(false)
+  const [radius, setRadius] = useState(null)   // null = sin límite
   const [selectedPost, setSelectedPost] = useState(null)
 
   useEffect(() => { fetchPosts() }, [])
@@ -51,9 +58,9 @@ export default function ListPage({ userLocation }) {
       p.description.toLowerCase().includes(search.toLowerCase())
     const matchCategory = category === 'todas' || p.category === category
     const matchDistance =
-      !onlyNearby ||
+      !radius ||
       !userLocation ||
-      getDistanceMeters(userLocation.lat, userLocation.lng, p.lat, p.lng) <= 1000
+      getDistanceMeters(userLocation.lat, userLocation.lng, p.lat, p.lng) <= radius
     return matchSearch && matchCategory && matchDistance
   })
 
@@ -91,15 +98,19 @@ export default function ListPage({ userLocation }) {
               </button>
             ))}
           </div>
-          <label className="nearby-toggle">
-            <input
-              id="toggle-nearby"
-              type="checkbox"
-              checked={onlyNearby}
-              onChange={e => setOnlyNearby(e.target.checked)}
-            />
-            <span>Solo 1km</span>
-          </label>
+          <div className="radius-filter" role="group" aria-label="Filtro por distancia">
+            <span className="radius-label">📍</span>
+            {RADIUS_OPTIONS.map(opt => (
+              <button
+                key={opt.label}
+                id={`radius-${opt.label}`}
+                className={`cat-chip ${radius === opt.value ? 'active' : ''}`}
+                onClick={() => setRadius(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
