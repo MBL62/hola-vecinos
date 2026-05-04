@@ -43,6 +43,29 @@ function MapController({ onLocated }) {
   return null
 }
 
+function LocateMeButton({ userLocation }) {
+  const map = useMap()
+  function handleLocate() {
+    if (userLocation) {
+      map.flyTo([userLocation.lat, userLocation.lng], 17, { animate: true, duration: 1.2 })
+    } else {
+      map.locate({ setView: true, maxZoom: 17 })
+    }
+  }
+  return (
+    <button
+      id="btn-locate-me"
+      className="btn-locate-me glass"
+      onClick={handleLocate}
+      title="Ir a mi ubicación"
+      aria-label="Aquí Estoy"
+    >
+      <span className="locate-icon">📍</span>
+      <span className="locate-label">Aquí Estoy</span>
+    </button>
+  )
+}
+
 function UserDotMarker({ position }) {
   const icon = L.divIcon({
     html: `<div class="user-dot"><div class="user-dot-pulse"></div></div>`,
@@ -149,6 +172,7 @@ export default function MapPage({ userLocation, onLocated }) {
           attribution='&copy; OpenStreetMap'
         />
         <MapController onLocated={onLocated} />
+        <LocateMeButton userLocation={userLocation} />
         {userLocation && <UserDotMarker position={userLocation} />}
         {filteredPosts.map(post => (
           <Marker

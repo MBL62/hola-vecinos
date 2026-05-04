@@ -131,6 +131,38 @@
   font-size: var(--text-md);
 }
 
+/* ---- Botón Aquí Estoy ---- */
+.btn-locate-me {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  z-index: 600;
+  border-radius: var(--radius-full);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+.btn-locate-me:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.btn-locate-me:active { transform: scale(0.96); }
+.locate-icon { font-size: 1.15rem; line-height: 1; }
+.locate-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+
 /* ---- Popup ---- */
 .leaflet-popup-content-wrapper {
   background: var(--color-surface) !important;
