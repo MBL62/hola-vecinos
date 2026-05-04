@@ -8,6 +8,8 @@ import NewPostModal from '../components/NewPostModal'
 import PostDetailModal from '../components/PostDetailModal'
 import './MapPage.css'
 
+const STADIA_KEY = import.meta.env.VITE_STADIA_KEY || ''
+
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -168,8 +170,9 @@ export default function MapPage({ userLocation, onLocated }) {
       {/* Mapa */}
       <MapContainer center={[-33.45, -70.65]} zoom={13} className="leaflet-map">
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; OpenStreetMap'
+          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`}
+          attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          maxZoom={20}
         />
         <MapController onLocated={onLocated} />
         <LocateMeButton userLocation={userLocation} />
