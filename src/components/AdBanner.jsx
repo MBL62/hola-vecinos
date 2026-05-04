@@ -23,7 +23,7 @@ export default function AdBanner() {
       <span className="ad-label">Publicidad</span>
       <a
         className="ad-placeholder"
-        href="mailto:contacto@holavecinos.app?subject=Publicidad en Hola Vecinos"
+        href="mailto:mbasoa@mblsol.org?subject=Publicidad en Hola Vecinos"
         title="Publicítate en Hola Vecinos"
       >
         <span className="ad-placeholder-emoji">📢</span>
