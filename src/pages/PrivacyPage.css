@@ -1,0 +1,101 @@
+.privacy-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-base);
+  padding: var(--space-lg) var(--space-md);
+}
+
+.privacy-container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.privacy-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.privacy-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+}
+
+.privacy-header h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff 40%, var(--color-brand-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.privacy-date {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.privacy-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.privacy-section {
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  backdrop-filter: blur(8px);
+}
+
+.privacy-section h2 {
+  font-size: var(--text-md);
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  color: var(--color-brand-light);
+}
+
+.privacy-section p,
+.privacy-section li {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.privacy-section ul {
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-sm);
+}
+
+.privacy-section a {
+  color: var(--color-brand-light);
+  text-decoration: underline;
+}
+
+.privacy-contact {
+  border-color: rgba(5, 150, 105, 0.3);
+  background: rgba(5, 150, 105, 0.06);
+}
+
+.privacy-footer {
+  text-align: center;
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.privacy-footer a {
+  color: var(--color-brand-light);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: none;
+}
+.privacy-footer a:hover { text-decoration: underline; }

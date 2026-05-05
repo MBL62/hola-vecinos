@@ -11,6 +11,7 @@ import ChatPage from './pages/ChatPage'
 import ChatsListPage from './pages/ChatsListPage'
 import ProfilePage from './pages/ProfilePage'
 import LandingPage from './pages/LandingPage'
+import PrivacyPage from './pages/PrivacyPage'
 
 function AppLayout({ children }) {
   return (
@@ -66,6 +67,9 @@ function AppRoutes() {
       <Route path="/auth" element={
         user ? <Navigate to="/" replace /> : <AuthPage />
       } />
+
+      {/* Pública: Política de Privacidad */}
+      <Route path="/privacidad" element={<PrivacyPage />} />
 
       {/* Rutas privadas */}
       <Route path="/chats" element={

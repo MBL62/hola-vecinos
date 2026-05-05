@@ -191,6 +191,9 @@ export default function LandingPage() {
           Contacto:{' '}
           <a href="mailto:mbasoa@mblsol.org">mbasoa@mblsol.org</a>
         </p>
+        <p>
+          <a href="/privacidad">Política de Privacidad</a>
+        </p>
       </footer>
     </div>
   )
