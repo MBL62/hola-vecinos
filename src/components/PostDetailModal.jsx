@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import LoginPromptModal from './LoginPromptModal'
+import { extractStorageFilename } from '../lib/compressImage'
 import './PostDetailModal.css'
 
 const CAT_EMOJI = { producto: '📦', servicio: '🔧', regalo: '🎁', trueque: '🔄' }
@@ -18,6 +19,14 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
 
   async function handleDelete() {
     if (!window.confirm('¿Eliminar esta publicación?')) return
+    // 1. Borrar imagen del Storage si existe
+    if (post.image_url) {
+      const filename = extractStorageFilename(post.image_url)
+      if (filename) {
+        await supabase.storage.from('post-images').remove([filename])
+      }
+    }
+    // 2. Borrar el registro
     await supabase.from('posts').delete().eq('id', post.id)
     onClose()
     onRefresh()

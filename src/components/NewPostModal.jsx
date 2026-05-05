@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { compressImage } from '../lib/compressImage'
 import './NewPostModal.css'
 
 const CATEGORIES = ['producto', 'servicio', 'regalo', 'trueque']
@@ -126,11 +127,12 @@ export default function NewPostModal({ userLocation, onClose, onCreated }) {
       // Subir imagen si existe
       let image_url = null
       if (imageFile) {
-        const ext = imageFile.name.split('.').pop()
-        const filename = `${user.id}-${Date.now()}.${ext}`
+        // Comprimir antes de subir → típico: 4MB → ~250KB
+        const compressed = await compressImage(imageFile)
+        const filename = `${user.id}-${Date.now()}.jpg`
         const { error: uploadError } = await supabase.storage
           .from('post-images')
-          .upload(filename, imageFile, { upsert: false })
+          .upload(filename, compressed, { upsert: false, contentType: 'image/jpeg' })
         if (uploadError) throw uploadError
         const { data: urlData } = supabase.storage.from('post-images').getPublicUrl(filename)
         image_url = urlData.publicUrl
