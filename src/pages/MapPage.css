@@ -98,6 +98,16 @@
   font-weight: 700;
   color: var(--color-brand-light);
   box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+.map-gps-warn {
+  background: rgba(217,119,6,0.15);
+  border-color: rgba(217,119,6,0.4);
+  color: #fbbf24;
+}
+.btn-locate-me.locating {
+  opacity: 0.75;
+  cursor: wait;
 }
 
 /* ---- User Location Dot ---- */

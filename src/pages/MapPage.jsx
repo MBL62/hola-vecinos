@@ -59,25 +59,39 @@ function MapController({ onLocated }) {
   return null
 }
 
-function LocateMeButton({ userLocation }) {
+function LocateMeButton({ userLocation, onLocated }) {
   const map = useMap()
+  const [locating, setLocating] = useState(false)
+
   function handleLocate() {
-    if (userLocation) {
-      map.flyTo([userLocation.lat, userLocation.lng], 17, { animate: true, duration: 1.2 })
-    } else {
-      map.locate({ setView: true, maxZoom: 17 })
-    }
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        onLocated(latlng)
+        map.flyTo([latlng.lat, latlng.lng], 17, { animate: true, duration: 1.2 })
+        setLocating(false)
+      },
+      () => {
+        // fallback: usar locate de Leaflet
+        map.locate({ setView: true, maxZoom: 17 })
+        setLocating(false)
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    )
   }
+
   return (
     <button
       id="btn-locate-me"
-      className="btn-locate-me glass"
+      className={`btn-locate-me glass ${locating ? 'locating' : ''}`}
       onClick={handleLocate}
       title="Ir a mi ubicación"
       aria-label="Aquí Estoy"
+      disabled={locating}
     >
-      <span className="locate-icon">📍</span>
-      <span className="locate-label">Aquí Estoy</span>
+      <span className="locate-icon">{locating ? '⏳' : '📍'}</span>
+      <span className="locate-label">{locating ? 'Buscando...' : 'Aquí Estoy'}</span>
     </button>
   )
 }
@@ -150,7 +164,9 @@ export default function MapPage({ userLocation, onLocated }) {
       p.description.toLowerCase().includes(search.toLowerCase())
     const matchCat = category === 'todas' || p.category === category
     const matchSub = subcategory === 'todas' || p.subcategory === subcategory
-    const matchRadius = !radius || !userLocation ||
+    // Si hay radio pero NO hay GPS, no mostrar nada (evita colapso)
+    if (radius && !userLocation) return false
+    const matchRadius = !radius ||
       getDistanceMeters(userLocation.lat, userLocation.lng, p.lat, p.lng) <= radius
     return matchSearch && matchCat && matchSub && matchRadius
   })
@@ -239,7 +255,7 @@ export default function MapPage({ userLocation, onLocated }) {
           maxZoom={20}
         />
         <MapController onLocated={onLocated} />
-        <LocateMeButton userLocation={userLocation} />
+        <LocateMeButton userLocation={userLocation} onLocated={onLocated} />
         {userLocation && <UserDotMarker position={userLocation} />}
         {userLocation && radius && (
           <Circle
@@ -268,8 +284,15 @@ export default function MapPage({ userLocation, onLocated }) {
         ))}
       </MapContainer>
 
+      {/* Aviso: radio activo pero sin GPS */}
+      {radius && !userLocation && (
+        <div className="map-results-badge map-gps-warn">
+          📍 Activa el GPS para ver resultados cercanos
+        </div>
+      )}
+
       {/* Badge de resultados */}
-      {(search || category !== 'todas' || subcategory !== 'todas' || radius) && (
+      {userLocation && (search || category !== 'todas' || subcategory !== 'todas' || radius) && (
         <div className="map-results-badge">
           {filteredPosts.length} resultado{filteredPosts.length !== 1 ? 's' : ''}
         </div>

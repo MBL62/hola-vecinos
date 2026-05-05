@@ -1,70 +1,64 @@
-const CACHE_NAME = 'hola-vecinos-v1'
+const CACHE_NAME = 'hola-vecinos-v2'
 
-// Archivos que se cachean al instalar la PWA
+// Solo cacheamos el shell básico (sin datos de vecinos)
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
+  '/manifest.json',
 ]
 
-// Instalar: precachear assets estáticos
+// Instalar: precachear íconos y manifest
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {
-        // Si falla algún asset, no bloqueamos la instalación
-      })
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS).catch(() => {}))
   )
   self.skipWaiting()
 })
 
-// Activar: limpiar cachés viejos
+// Activar: limpiar versiones viejas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   )
   self.clients.claim()
 })
 
-// Fetch: Network-first para API/Supabase, Cache-first para assets estáticos
+// NETWORK-FIRST: siempre intenta la red primero
+// Los datos de vecinos (Supabase) siempre van directo a la red
 self.addEventListener('fetch', (event) => {
+  // Solo interceptar GET del mismo origen (la app)
+  if (event.request.method !== 'GET') return
+
   const url = new URL(event.request.url)
 
-  // Siempre ir a la red para Supabase, mapas y APIs externas
+  // APIs externas y Supabase: siempre red directa (nunca caché)
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('stadiamaps.com') ||
     url.hostname.includes('googletagmanager.com') ||
     url.hostname.includes('fonts.googleapis.com') ||
-    event.request.method !== 'GET'
+    url.hostname.includes('fonts.gstatic.com')
   ) {
-    return // comportamiento normal del navegador
+    return // deja que el navegador lo maneje normalmente
   }
 
-  // Para el resto: Cache-first con fallback a red
+  // Para recursos propios: Network-first, caché solo como emergencia offline
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached
-      return fetch(event.request).then((response) => {
-        // Solo cachear respuestas válidas de nuestro dominio
-        if (
-          response.status === 200 &&
-          url.origin === self.location.origin
-        ) {
+    fetch(event.request)
+      .then((response) => {
+        // Guardar en caché si es exitoso
+        if (response.status === 200) {
           const clone = response.clone()
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
         }
         return response
       })
-    })
+      .catch(() => {
+        // Sin red: intentar caché (solo para íconos y shell)
+        return caches.match(event.request)
+      })
   )
 })
+
