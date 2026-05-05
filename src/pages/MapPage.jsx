@@ -32,11 +32,9 @@ const SUBCATEGORIES = [
   { value: 'Otros', emoji: '📦' },
 ]
 const RADIUS_OPTIONS = [
-  { label: 'Todo', value: null },
   { label: '500m', value: 500 },
-  { label: '1km', value: 1000 },
-  { label: '2km', value: 2000 },
-  { label: '5km', value: 5000 },
+  { label: '1km',  value: 1000 },
+  { label: '2km',  value: 2000 },
 ]
 
 function createCategoryIcon(category) {
@@ -107,7 +105,7 @@ export default function MapPage({ userLocation, onLocated }) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('todas')
   const [subcategory, setSubcategory] = useState('todas')
-  const [radius, setRadius] = useState(null)
+  const [radius, setRadius] = useState(500)   // 500m por defecto
   const [showFilters, setShowFilters] = useState(false)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 

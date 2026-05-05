@@ -21,11 +21,9 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
 
 const CATEGORY_OPTIONS = ['todas', 'producto', 'servicio', 'regalo', 'trueque']
 const RADIUS_OPTIONS = [
-  { label: 'Todo', value: null },
   { label: '500m', value: 500 },
   { label: '1km',  value: 1000 },
   { label: '2km',  value: 2000 },
-  { label: '5km',  value: 5000 },
 ]
 
 export default function ListPage({ userLocation }) {
@@ -35,7 +33,7 @@ export default function ListPage({ userLocation }) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('todas')
-  const [radius, setRadius] = useState(null)   // null = sin límite
+  const [radius, setRadius] = useState(500)   // 500m por defecto
   const [selectedPost, setSelectedPost] = useState(null)
 
   useEffect(() => { fetchPosts() }, [])
