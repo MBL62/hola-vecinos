@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /landing
+Disallow: /auth
+Disallow: /chat/
+Disallow: /chats
+Disallow: /profile
+
+Sitemap: https://holavecinos.cl/sitemap.xml

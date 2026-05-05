@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import NewPostModal from '../components/NewPostModal'
 import PostDetailModal from '../components/PostDetailModal'
+import LoginPromptModal from '../components/LoginPromptModal'
 import './MapPage.css'
 
 const STADIA_KEY = import.meta.env.VITE_STADIA_KEY || ''
@@ -22,6 +23,21 @@ const CATEGORY_COLORS = {
   regalo: '#059669',   trueque: '#D97706',
 }
 const CATEGORY_EMOJIS = { producto: '📦', servicio: '🔧', regalo: '🎁', trueque: '🔄' }
+const SUBCATEGORIES = [
+  { value: 'Electrónicos', emoji: '📱' },
+  { value: 'Hogar y Muebles', emoji: '🏠' },
+  { value: 'Ropa y Calzado', emoji: '👕' },
+  { value: 'Alimentos', emoji: '🥦' },
+  { value: 'Juguetes y Juegos', emoji: '🧸' },
+  { value: 'Otros', emoji: '📦' },
+]
+const RADIUS_OPTIONS = [
+  { label: 'Todo', value: null },
+  { label: '500m', value: 500 },
+  { label: '1km', value: 1000 },
+  { label: '2km', value: 2000 },
+  { label: '5km', value: 5000 },
+]
 
 function createCategoryIcon(category) {
   const color = CATEGORY_COLORS[category] || '#059669'
@@ -90,7 +106,10 @@ export default function MapPage({ userLocation, onLocated }) {
   const [selectedPost, setSelectedPost] = useState(null)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('todas')
+  const [subcategory, setSubcategory] = useState('todas')
+  const [radius, setRadius] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
   useEffect(() => { fetchPosts() }, [])
 
@@ -117,12 +136,25 @@ export default function MapPage({ userLocation, onLocated }) {
     ]
   }
 
+  function getDistanceMeters(lat1, lng1, lat2, lng2) {
+    const R = 6371000
+    const φ1 = (lat1 * Math.PI) / 180
+    const φ2 = (lat2 * Math.PI) / 180
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180
+    const Δλ = ((lng2 - lng1) * Math.PI) / 180
+    const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  }
+
   const filteredPosts = posts.filter(p => {
     const matchSearch = !search ||
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.description.toLowerCase().includes(search.toLowerCase())
     const matchCat = category === 'todas' || p.category === category
-    return matchSearch && matchCat
+    const matchSub = subcategory === 'todas' || p.subcategory === subcategory
+    const matchRadius = !radius || !userLocation ||
+      getDistanceMeters(userLocation.lat, userLocation.lng, p.lat, p.lng) <= radius
+    return matchSearch && matchCat && matchSub && matchRadius
   })
 
   return (
@@ -151,19 +183,53 @@ export default function MapPage({ userLocation, onLocated }) {
         >⚙️</button>
       </div>
 
-      {/* Chips de categoría */}
+      {/* Panel de filtros */}
       {showFilters && (
-        <div className="map-cat-bar glass">
-          {CATEGORIES.map(c => (
+        <div className="map-filter-panel glass">
+          {/* Fila 1: Tipo de publicación */}
+          <div className="map-filter-row">
+            {CATEGORIES.map(c => (
+              <button
+                key={c}
+                id={`map-filter-${c}`}
+                className={`cat-chip ${category === c ? 'active' : ''}`}
+                onClick={() => setCategory(c)}
+              >
+                {c === 'todas' ? 'Todas' : `${CATEGORY_EMOJIS[c]} ${c.charAt(0).toUpperCase() + c.slice(1)}`}
+              </button>
+            ))}
+          </div>
+          {/* Fila 2: Subcategoría */}
+          <div className="map-filter-row">
             <button
-              key={c}
-              id={`map-filter-${c}`}
-              className={`cat-chip ${category === c ? 'active' : ''}`}
-              onClick={() => setCategory(c)}
-            >
-              {c === 'todas' ? 'Todas' : `${CATEGORY_EMOJIS[c]} ${c.charAt(0).toUpperCase() + c.slice(1)}`}
-            </button>
-          ))}
+              className={`cat-chip ${subcategory === 'todas' ? 'active' : ''}`}
+              onClick={() => setSubcategory('todas')}
+            >Todas</button>
+            {SUBCATEGORIES.map(s => (
+              <button
+                key={s.value}
+                id={`map-subcat-${s.value}`}
+                className={`cat-chip ${subcategory === s.value ? 'active' : ''}`}
+                onClick={() => setSubcategory(s.value)}
+              >
+                {s.emoji} {s.value}
+              </button>
+            ))}
+          </div>
+          {/* Fila 3: Radio */}
+          <div className="map-filter-row">
+            <span className="radius-label">📍</span>
+            {RADIUS_OPTIONS.map(opt => (
+              <button
+                key={opt.label}
+                id={`map-radius-${opt.label}`}
+                className={`cat-chip ${radius === opt.value ? 'active' : ''}`}
+                onClick={() => setRadius(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -177,6 +243,13 @@ export default function MapPage({ userLocation, onLocated }) {
         <MapController onLocated={onLocated} />
         <LocateMeButton userLocation={userLocation} />
         {userLocation && <UserDotMarker position={userLocation} />}
+        {userLocation && radius && (
+          <Circle
+            center={[userLocation.lat, userLocation.lng]}
+            radius={radius}
+            pathOptions={{ color: '#059669', fillColor: '#059669', fillOpacity: 0.06, weight: 1.5, dashArray: '6 4' }}
+          />
+        )}
         {filteredPosts.map(post => (
           <Marker
             key={post.id}
@@ -198,7 +271,7 @@ export default function MapPage({ userLocation, onLocated }) {
       </MapContainer>
 
       {/* Badge de resultados */}
-      {(search || category !== 'todas') && (
+      {(search || category !== 'todas' || subcategory !== 'todas' || radius) && (
         <div className="map-results-badge">
           {filteredPosts.length} resultado{filteredPosts.length !== 1 ? 's' : ''}
         </div>
@@ -208,7 +281,7 @@ export default function MapPage({ userLocation, onLocated }) {
       <button
         id="btn-new-post"
         className="fab-map btn btn-primary"
-        onClick={() => setShowNewPost(true)}
+        onClick={() => user ? setShowNewPost(true) : setShowLoginPrompt(true)}
         title="Nueva publicación"
       >
         <span style={{ fontSize: '1.4rem' }}>+</span>
@@ -228,6 +301,12 @@ export default function MapPage({ userLocation, onLocated }) {
           currentUserId={user?.id}
           onClose={() => setSelectedPost(null)}
           onRefresh={fetchPosts}
+        />
+      )}
+      {showLoginPrompt && (
+        <LoginPromptModal
+          action="publicar"
+          onClose={() => setShowLoginPrompt(false)}
         />
       )}
     </div>

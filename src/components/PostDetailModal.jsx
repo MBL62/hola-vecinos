@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import LoginPromptModal from './LoginPromptModal'
 import './PostDetailModal.css'
 
 const CAT_EMOJI = { producto: '📦', servicio: '🔧', regalo: '🎁', trueque: '🔄' }
@@ -12,6 +14,7 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
   const isOwner = post.user_id === currentUserId
   const expiresAt = new Date(post.expires_at)
   const hoursLeft = Math.max(0, Math.round((expiresAt - Date.now()) / 3600000))
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
   async function handleDelete() {
     if (!window.confirm('¿Eliminar esta publicación?')) return
@@ -32,6 +35,7 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
   }
 
   function handleContact() {
+    if (!user) { setShowLoginPrompt(true); return }
     navigate(`/chat/${post.id}/${post.user_id}`)
   }
 
@@ -115,6 +119,12 @@ export default function PostDetailModal({ post, currentUserId, onClose, onRefres
           </div>
         </div>
       </div>
+      {showLoginPrompt && (
+        <LoginPromptModal
+          action="contactar a este vecino"
+          onClose={() => setShowLoginPrompt(false)}
+        />
+      )}
     </div>
   )
 }

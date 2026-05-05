@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import { NotifProvider, useNotif } from './context/NotifContext'
+import { NotifProvider } from './context/NotifContext'
 import BottomNav from './components/BottomNav'
 import AdBanner from './components/AdBanner'
 import AuthPage from './pages/AuthPage'
@@ -10,9 +10,9 @@ import ListPage from './pages/ListPage'
 import ChatPage from './pages/ChatPage'
 import ChatsListPage from './pages/ChatsListPage'
 import ProfilePage from './pages/ProfilePage'
+import LandingPage from './pages/LandingPage'
 
 function AppLayout({ children }) {
-  const { clearUnread } = useNotif()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
@@ -24,10 +24,12 @@ function AppLayout({ children }) {
   )
 }
 
-function PrivateRoutes() {
+function AppRoutes() {
   const { user } = useAuth()
+  const location = useLocation()
   const [userLocation, setUserLocation] = useState(null)
 
+  // Cargando sesión
   if (user === undefined) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -35,58 +37,62 @@ function PrivateRoutes() {
       </div>
     )
   }
-  if (!user) return <Navigate to="/auth" replace />
 
-  return (
-    <NotifProvider user={user}>
-      <Routes>
-        {/* Rutas con nav inferior */}
-        <Route path="/" element={
-          <AppLayout>
-            <MapPage userLocation={userLocation} onLocated={setUserLocation} />
-          </AppLayout>
-        } />
-        <Route path="/list" element={
-          <AppLayout>
-            <ListPage userLocation={userLocation} />
-          </AppLayout>
-        } />
-        <Route path="/chats" element={
-          <AppLayout>
-            <ChatsListPage />
-          </AppLayout>
-        } />
-        <Route path="/profile" element={
-          <AppLayout>
-            <ProfilePage />
-          </AppLayout>
-        } />
+  const notifWrapper = (children) =>
+    user ? <NotifProvider user={user}>{children}</NotifProvider> : children
 
-        {/* Chat individual — sin nav inferior para enfoque */}
-        <Route path="/chat/:postId/:userId" element={<ChatPage />} />
+  return notifWrapper(
+    <Routes location={location}>
+      {/* Pública: landing para visitantes, mapa para usuarios logueados */}
+      <Route path="/" element={
+        user
+          ? <AppLayout><MapPage userLocation={userLocation} onLocated={setUserLocation} /></AppLayout>
+          : <LandingPage />
+      } />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </NotifProvider>
+      {/* Mapa y lista son públicos (modo visitante) */}
+      <Route path="/map" element={
+        <AppLayout>
+          <MapPage userLocation={userLocation} onLocated={setUserLocation} />
+        </AppLayout>
+      } />
+      <Route path="/list" element={
+        <AppLayout>
+          <ListPage userLocation={userLocation} />
+        </AppLayout>
+      } />
+
+      {/* Auth */}
+      <Route path="/auth" element={
+        user ? <Navigate to="/" replace /> : <AuthPage />
+      } />
+
+      {/* Rutas privadas */}
+      <Route path="/chats" element={
+        user
+          ? <AppLayout><ChatsListPage /></AppLayout>
+          : <Navigate to="/auth" replace />
+      } />
+      <Route path="/chat/:postId/:userId" element={
+        user ? <ChatPage /> : <Navigate to="/auth" replace />
+      } />
+      <Route path="/profile" element={
+        user
+          ? <AppLayout><ProfilePage /></AppLayout>
+          : <Navigate to="/auth" replace />
+      } />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
-}
-
-function PublicRoute({ children }) {
-  const { user } = useAuth()
-  if (user === undefined) return null
-  return user ? <Navigate to="/" replace /> : children
 }
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
-          <Route path="/*" element={<PrivateRoutes />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
   )
 }
-

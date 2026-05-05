@@ -6,6 +6,14 @@ import './NewPostModal.css'
 const CATEGORIES = ['producto', 'servicio', 'regalo', 'trueque']
 const DELIVERY = ['retiro', 'despacho']
 const PRICE_CATEGORIES = ['producto', 'servicio']
+const SUBCATEGORIES = [
+  { value: 'Electrónicos', emoji: '📱' },
+  { value: 'Hogar y Muebles', emoji: '🏠' },
+  { value: 'Ropa y Calzado', emoji: '👕' },
+  { value: 'Alimentos', emoji: '🥦' },
+  { value: 'Juguetes y Juegos', emoji: '🧸' },
+  { value: 'Otros', emoji: '📦' },
+]
 
 const BLOCKED_TERMS = [
   /\bdroga[s]?\b/i, /\bcocaína\b/i, /\bmarihuana\b/i, /\bheroin[a]?\b/i,
@@ -20,7 +28,8 @@ function containsBlockedContent(text) {
 export default function NewPostModal({ userLocation, onClose, onCreated }) {
   const { user } = useAuth()
   const [form, setForm] = useState({
-    title: '', description: '', category: 'producto', delivery_type: 'retiro',
+    title: '', description: '', category: 'producto',
+    delivery_type: 'retiro', subcategory: 'Otros',
   })
   const [priceDisplay, setPriceDisplay] = useState('')  // texto formateado: "10.000"
   const [priceRaw, setPriceRaw] = useState(null)        // número real: 10000
@@ -135,6 +144,7 @@ export default function NewPostModal({ userLocation, onClose, onCreated }) {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
+        subcategory: form.subcategory,
         delivery_type: form.delivery_type,
         lat: userLocation.lat,
         lng: userLocation.lng,
@@ -208,6 +218,15 @@ export default function NewPostModal({ userLocation, onClose, onCreated }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="post-subcategory">🏷️ Subcategoría</label>
+            <select id="post-subcategory" name="subcategory" value={form.subcategory} onChange={handleChange}>
+              {SUBCATEGORIES.map(s => (
+                <option key={s.value} value={s.value}>{s.emoji} {s.value}</option>
+              ))}
+            </select>
           </div>
 
           {/* Precio — solo para producto y servicio */}
